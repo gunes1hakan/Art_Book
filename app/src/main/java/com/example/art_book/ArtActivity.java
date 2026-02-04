@@ -11,13 +11,15 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.art_book.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity {
+public class ArtActivity extends AppCompatActivity {
+
     private ActivityMainBinding binding;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
+        EdgeToEdge.enable(this);
         View view = binding.getRoot();
         setContentView(view);
 
@@ -44,5 +46,13 @@ public class MainActivity extends AppCompatActivity {
             );
             return insets;
         });
+    }
+
+    public void choosePhoto(View view){
+
+    }
+
+    public void save(View view){
+
     }
 }

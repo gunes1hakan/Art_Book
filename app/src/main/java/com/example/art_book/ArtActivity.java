@@ -25,8 +25,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.art_book.databinding.ActivityArtBinding;
-import com.example.art_book.databinding.ActivityMainBinding;
 import com.google.android.material.snackbar.Snackbar;
+
+import java.io.ByteArrayOutputStream;
 
 public class ArtActivity extends AppCompatActivity {
 
@@ -112,6 +113,30 @@ public class ArtActivity extends AppCompatActivity {
     }
 
     public void save(View view){
+        String name=binding.editTextArtName.getText().toString();
+        String artistName=binding.editTextArtistName.getText().toString();
+        String year=binding.editTextYear.getText().toString();
+        Bitmap smallImage= makeSmallerImage(selectedImage,300);
+
+        ByteArrayOutputStream outputStream= new ByteArrayOutputStream();
+        smallImage.compress(Bitmap.CompressFormat.JPEG,80,outputStream);
+        byte[] byteArray= outputStream.toByteArray();
+    }
+
+    public Bitmap makeSmallerImage(Bitmap image,int maximumSize){       //Resized and converted images to Bitmap
+        int width=image.getWidth();
+        int height=image.getHeight();
+
+        float bitmapRatio= (float) width/(float) height;
+
+        if(bitmapRatio > 1){
+            width=maximumSize;
+            height=(int) (width/bitmapRatio);
+        }else{
+            height=maximumSize;
+            width=(int) (height*bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(image, width,height,true);
 
     }
 

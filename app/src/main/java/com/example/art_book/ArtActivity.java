@@ -3,9 +3,11 @@ package com.example.art_book;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
@@ -53,6 +55,7 @@ public class ArtActivity extends AppCompatActivity {
 
         applyEdgeToEdgePadding(view);
         ViewCompat.requestApplyInsets(view);
+        setupState();
     }
 
     private void applyEdgeToEdgePadding(View view) {        //Applies WindowInsets (status/nav bars & notch) as padding to prevent UI overlap
@@ -202,6 +205,44 @@ public class ArtActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void setupState(){      //Logic handling the distinction between 'Create Mode' and 'View Mode'.
+        Intent intent=getIntent();
+        String info=intent.getStringExtra("info");
+
+        if(info.equals("new")){
+            binding.editTextArtName.setText("");
+            binding.editTextArtistName.setText("");
+            binding.editTextYear.setText("");
+            binding.btnChoosePhoto.setVisibility(View.VISIBLE);
+            binding.btnSave.setVisibility(View.VISIBLE);
+            binding.imageView.setImageResource(R.drawable.select_image);
+        }else{
+            int artId=intent.getIntExtra("artId",0);
+            binding.btnChoosePhoto.setVisibility(View.INVISIBLE);
+            binding.btnSave.setVisibility(View.INVISIBLE);
+            try{
+                Cursor cursor = database.rawQuery("SELECT * FROM arts WHERE id= ?",new String[]{String.valueOf(artId)});
+                int artNameIx= cursor.getColumnIndex("artname");
+                int painterNameIx= cursor.getColumnIndex("paintername");
+                int yearIx=cursor.getColumnIndex("year");
+                int imageIx=cursor.getColumnIndex("image");
+
+                while(cursor.moveToNext()){
+                    binding.editTextArtName.setText(cursor.getString(artNameIx));
+                    binding.editTextArtistName.setText(cursor.getString(painterNameIx));
+                    binding.editTextYear.setText(String.valueOf(cursor.getInt(yearIx)));
+
+                    byte[] bytes= cursor.getBlob(imageIx);
+                    Bitmap bitmap= BitmapFactory.decodeByteArray(bytes,0, bytes.length);
+                    binding.imageView.setImageBitmap(bitmap);
+                }
+                cursor.close();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
 }

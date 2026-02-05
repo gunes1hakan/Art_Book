@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.art_book.databinding.ActivityMainBinding;
 
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
+    ArtAdapter artAdapter;
     ArrayList<Art> artArrayList;
 
     @Override
@@ -31,13 +33,19 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+        artArrayList = new ArrayList<>();
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        artAdapter = new ArtAdapter(artArrayList);
+        binding.recyclerView.setAdapter(artAdapter);
 
         applyEdgeToEdgePadding(view);
         ViewCompat.requestApplyInsets(view);
         setSupportActionBar(binding.toolbar);
+        getData();
     }
 
-    private void applyEdgeToEdgePadding(View view) {        //Applies WindowInsets (status/nav bars & notch) as padding to prevent UI overlap
+    private void applyEdgeToEdgePadding(View view) { // Applies WindowInsets (status/nav bars & notch) as padding to
+                                                     // prevent UI overlap
         final int pL = view.getPaddingLeft();
         final int pT = view.getPaddingTop();
         final int pR = view.getPaddingRight();
@@ -45,50 +53,49 @@ public class MainActivity extends AppCompatActivity {
 
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
             Insets sys = insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout()
-            );
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
 
             v.setPadding(
                     pL + sys.left,
                     pT + sys.top,
                     pR + sys.right,
-                    pB + sys.bottom
-            );
+                    pB + sys.bottom);
             return insets;
         });
     }
 
-    private void getData(){
-        try{
-            SQLiteDatabase database=this.openOrCreateDatabase("Arts",MODE_PRIVATE,null);
-            Cursor cursor = database.rawQuery("SELECT * FROM arts",null);
-            int nameIx=cursor.getColumnIndex("artname");
-            int idIx=cursor.getColumnIndex("id");
+    private void getData() {
+        try {
+            SQLiteDatabase database = this.openOrCreateDatabase("Arts", MODE_PRIVATE, null);
+            Cursor cursor = database.rawQuery("SELECT * FROM arts", null);
+            int nameIx = cursor.getColumnIndex("artname");
+            int idIx = cursor.getColumnIndex("id");
 
-            while(cursor.moveToNext()){
-                String name=cursor.getString(nameIx);
-                int id=cursor.getInt(idIx);
-                Art art=new Art(name,id);
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(nameIx);
+                int id = cursor.getInt(idIx);
+                Art art = new Art(name, id);
                 artArrayList.add(art);
-                cursor.close();
             }
-        }catch(Exception e){
+            cursor.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater=getMenuInflater();
-        menuInflater.inflate(R.menu.art_menu,menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.art_menu, menu);
 
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId()==R.id.add_art){
-            Intent intent=new Intent(this, ArtActivity.class);
+        if (item.getItemId() == R.id.add_art) {
+            Intent intent = new Intent(this, ArtActivity.class);
+            intent.putExtra("info", "new");
             startActivity(intent);
             return true;
         }
